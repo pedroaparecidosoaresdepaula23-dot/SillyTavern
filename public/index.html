@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text Adder Site</title>
+    <title>Saved Text Board</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -29,17 +29,32 @@
             resize: vertical;
             min-height: 60px;
         }
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
         button {
             padding: 10px 20px;
             font-size: 16px;
-            background-color: #007bff;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
         }
-        button:hover {
-            background-color: #0056b3;
+        .add-btn {
+            background-color: #28a745;
+        }
+        .add-btn:hover {
+            background-color: #218838;
+        }
+        .clear-btn {
+            background-color: #dc3545;
+            font-size: 14px;
+            padding: 5px 10px;
+        }
+        .clear-btn:hover {
+            background-color: #c82333;
         }
         ul {
             list-style-type: none;
@@ -50,36 +65,72 @@
             padding: 12px;
             margin-bottom: 8px;
             border-radius: 4px;
-            border-left: 5px solid #007bff;
+            border-left: 5px solid #28a745;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             word-wrap: break-word;
+        }
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
     </style>
 </head>
 <body>
 
-    <h1>My Text Board</h1>
+    <div class="header-container">
+        <h1>My Saved Notes</h1>
+        <button class="clear-btn" onclick="clearAll()">Clear All</button>
+    </div>
     
     <div class="input-container">
-        <textarea id="textInput" placeholder="Type your text here..."></textarea>
-        <button onclick="addText()">Add Text</button>
+        <textarea id="textInput" placeholder="Type something to save..."></textarea>
+        <div class="buttons">
+            <button class="add-btn" onclick="addText()">Save Text</button>
+        </div>
     </div>
 
     <ul id="textList"></ul>
 
     <script>
+        // Load saved text when the page opens
+        document.addEventListener("DOMContentLoaded", loadSavedText);
+
         function addText() {
             const input = document.getElementById('textInput');
-            const list = document.getElementById('textList');
             const textValue = input.value.trim();
 
             if (textValue !== "") {
-                const listItem = document.createElement('li');
-                listItem.textContent = textValue;
-                list.appendChild(listItem);
-                input.value = ""; // Clear the input field after adding
+                createListItem(textValue);
+                saveToLocalStorage(textValue);
+                input.value = ""; // Clear input
             } else {
                 alert("Please type something first!");
+            }
+        }
+
+        function createListItem(text) {
+            const list = document.getElementById('textList');
+            const listItem = document.createElement('li');
+            listItem.textContent = text;
+            list.appendChild(listItem);
+        }
+
+        function saveToLocalStorage(text) {
+            let savedTexts = JSON.parse(localStorage.getItem("myTexts")) || [];
+            savedTexts.push(text);
+            localStorage.setItem("myTexts", JSON.stringify(savedTexts));
+        }
+
+        function loadSavedText() {
+            let savedTexts = JSON.parse(localStorage.getItem("myTexts")) || [];
+            savedTexts.forEach(text => createListItem(text));
+        }
+
+        function clearAll() {
+            if (confirm("Are you sure you want to delete all saved text?")) {
+                localStorage.removeItem("myTexts");
+                document.getElementById('textList').innerHTML = "";
             }
         }
     </script>
